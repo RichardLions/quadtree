@@ -136,7 +136,7 @@ SDL_AppResult SDL_AppIterate(void* const appState)
     if(appData->m_DrawQuadtree)
     {
         SDL_SetRenderDrawColor(appData->m_Renderer, 0, 0, 255, 255);
-        RenderQuadtree(appData->m_Renderer, appData->m_Quadtree.GetRootNode());
+        RenderQuadtree(appData->m_Renderer, appData->m_Quadtree.GetRootBranch());
     }
 
     if(appData->m_DrawTestSelectionQuad)
@@ -148,18 +148,22 @@ SDL_AppResult SDL_AppIterate(void* const appState)
         SDL_SetRenderDrawColor(appData->m_Renderer, 255, 255, 255, 255);
         SDL_RenderRect(appData->m_Renderer, &rect);
 
-        std::vector<Quadtree::Node*> nodes{};
-        if(appData->m_Quadtree.FindNodes(mouseRect, nodes))
+        std::vector<Quadtree::Branch*> branches{};
+        if(appData->m_Quadtree.FindBranches(mouseRect, branches))
         {
-            for(const Quadtree::Node* const node : nodes)
+            for(const Quadtree::Branch* const branch : branches)
             {
-                const SDL_FRect nodeRect{node->GetRect().GetTopLeft().x, node->GetRect().GetTopLeft().y, node->GetRect().GetWidth(), node->GetRect().GetHeight()};
-                SDL_RenderRect(appData->m_Renderer, &nodeRect);
+                const SDL_FRect branchRect{
+                    branch->GetRect().GetTopLeft().x,
+                    branch->GetRect().GetTopLeft().y,
+                    branch->GetRect().GetWidth(),
+                    branch->GetRect().GetHeight()};
+                SDL_RenderRect(appData->m_Renderer, &branchRect);
             }
         }
 
         std::vector<Circle*> circles{};
-        if(appData->m_Quadtree.FindPoints(mouseRect, circles))
+        if(appData->m_Quadtree.FindLeaves(mouseRect, circles))
         {
             for(const Circle* const circle : circles)
             {

@@ -5,17 +5,17 @@
 
 void UpdateCirclesQuadtree(std::vector<Circle>& circles, Quadtree& quadtree, const float_t delta)
 {
-    std::vector<Quadtree::Node*> nodes{};
+    std::vector<Quadtree::Branch*> foundBranches{};
     for(Circle& circle : circles)
     {
-        nodes.clear();
+        foundBranches.clear();
         const float_t widthHeight{circle.m_Radius * 2.0f};
         const Rectangle circleAprox{circle.m_Position - glm::vec2{circle.m_Radius, circle.m_Radius}, widthHeight, widthHeight};
-        quadtree.FindNodes(circleAprox, nodes);
+        quadtree.FindBranches(circleAprox, foundBranches);
 
-        for(Quadtree::Node* const node : nodes)
+        for(Quadtree::Branch* const branch : foundBranches)
         {
-            for(Circle* const otherCircle : node->GetPoints())
+            for(Circle* const otherCircle : branch->GetLeaves())
             {
                 if(&circle == otherCircle)
                     continue;

@@ -1,16 +1,26 @@
 # Quadtree
 
-...
+This was inspired by [Quadtree](https://en.wikipedia.org/wiki/Quadtree).
 
 ## Setup
 
 This repository uses the .sln/.proj files created by Visual Studio 2022 Community Edition.
 Using MSVC compiler, Preview version(C++23 Preview). 
 
-### Catch2
-The examples for how to use the pattern are written as Unit Tests.
+### SDL3
+Running the visualisation project will show the Quadtree running.
 
-Launching the program in Debug or Release will run the Unit Tests.
+Inputs:
+1 - Render Quadtree on/off
+2 - Render mouse position Quadtree test on/off
+Space - Pause the simulation on/off
+Enter - Switch between brute force collision tests and using Quadtree
+ESC - Shutdown
+
+### Catch2
+The examples for how to use the Quadtree are written as Unit Tests.
+
+Launching the test project in Debug or Release will run the Unit Tests.
 
 Alternative:
 Installing the Test Adapter for Catch2 Visual Studio extension enables running the Unit Tests via the Test Explorer Window. Setup the Test Explorer to use the project's .runsettings file.
@@ -40,3 +50,4 @@ vcpkg new --application
 - [x] Implementation
 - [ ] Unit Tests
 - [x] Benchmarks
+- [x] Visualisation

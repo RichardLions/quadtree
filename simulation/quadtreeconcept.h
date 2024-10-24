@@ -5,218 +5,210 @@
 
 #include "shapeprimitives.h"
 
-template <typename T>
-concept HasGetPositionVec2D =
-    requires(T type)
+template <typename TLeaf>
+concept LeafHasGetPositionVec2D =
+    requires(TLeaf leaf)
     {
-        { type.GetPosition() } -> std::same_as<const glm::vec2&>;
+        { leaf.GetPosition() } -> std::same_as<const glm::vec2&>;
     };
 
-template<class TPoint, uint32_t SplitThreshold = 4, uint32_t ChildDepthThreshold = 2> requires HasGetPositionVec2D<TPoint>
+template<class TLeaf, uint32_t SplitThreshold = 4, uint32_t ChildDepthThreshold = 2> requires LeafHasGetPositionVec2D<TLeaf>
 class QuadtreeConcept
 {
 public:
-    using Point = TPoint;
+    using Leaf = TLeaf;
 
-    class Node
+    class Branch
     {
     public:
-        Node() = default;
-        explicit Node(uint32_t depth);
-        void AddPoint(TPoint* newPoint);
+        Branch() = default;
+        explicit Branch(uint32_t depth, Rectangle&& rect);
+        void AddLeaf(Leaf* newLeaf);
         void Reset();
-        static Node* FindNode(Node* node, const glm::vec2& point);
-        void FindNodes(const Rectangle& rect, std::vector<Node*>& foundNodes);
-        void FindPoints(const Rectangle& rect, std::vector<TPoint*>& foundPoints) const;
+        static Branch* FindBranch(Branch* branch, const glm::vec2& point);
+        void FindBranches(const Rectangle& rect, std::vector<Branch*>& foundBranches);
+        void FindLeaves(const Rectangle& rect, std::vector<Leaf*>& foundLeaves) const;
         void SetRect(Rectangle&& rect);
+        bool HasBranches() const { return !m_Branches.empty(); }
         const Rectangle& GetRect() const { return m_Rect; }
-        const std::vector<Node>& GetChildren() const { return m_Children; }
-        const std::vector<TPoint*>& GetPoints() const { return m_Points; }
+        const std::vector<Branch>& GetBranches() const { return m_Branches; }
+        const std::vector<Leaf*>& GetLeaves() const { return m_Leaves; }
     private:
-        std::vector<Node> m_Children{};
-        std::vector<TPoint*> m_Points{};
+        std::vector<Branch> m_Branches{};
+        std::vector<Leaf*> m_Leaves{};
         Rectangle m_Rect{};
         uint32_t m_Depth{0};
     };
 
-    bool FindPoints(const Rectangle& rect, std::vector<TPoint*>& foundPoints) const;
-    bool FindNodes(const Rectangle& rect, std::vector<Node*>& foundNodes);
-    const Node& GetRootNode() const { return m_RootNode; }
-    Node* FindNode(const glm::vec2& point);
-    void AddPoint(TPoint* newPoint);
+    bool FindLeaves(const Rectangle& rect, std::vector<Leaf*>& foundLeaves) const;
+    bool FindBranches(const Rectangle& rect, std::vector<Branch*>& foundBranches);
+    const Branch& GetRootBranch() const { return m_RootBranch; }
+    Branch* FindBranch(const glm::vec2& point);
+    void AddLeaf(Leaf* newLeaf);
     void Reset();
 private:
-    Node m_RootNode{0};
+    Branch m_RootBranch{};
 };
 
 template<class TQuadtree>
-void RebuildQuadtreeConcept(TQuadtree& quadtree, std::vector<typename TQuadtree::Point>& points)
+void RebuildQuadtreeConcept(TQuadtree& quadtree, std::vector<typename TQuadtree::Leaf>& leaves)
 {
     quadtree.Reset();
 
-    for(typename TQuadtree::Point& point : points)
+    for(typename TQuadtree::Leaf& leaf : leaves)
     {
-        quadtree.AddPoint(&point);
+        quadtree.AddLeaf(&leaf);
     }
 }
 
-template<class TPoint, uint32_t SplitThreshold, uint32_t ChildDepthThreshold> requires HasGetPositionVec2D<TPoint>
-QuadtreeConcept<TPoint, SplitThreshold, ChildDepthThreshold>::Node::Node(const uint32_t depth)
+template<class TLeaf, uint32_t SplitThreshold, uint32_t ChildDepthThreshold> requires LeafHasGetPositionVec2D<TLeaf>
+QuadtreeConcept<TLeaf, SplitThreshold, ChildDepthThreshold>::Branch::Branch(const uint32_t depth, Rectangle&& rect)
     : m_Depth{depth}
+    , m_Rect{std::move(rect)}
 {
 }
 
-template<class TPoint, uint32_t SplitThreshold, uint32_t ChildDepthThreshold> requires HasGetPositionVec2D<TPoint>
-void QuadtreeConcept<TPoint, SplitThreshold, ChildDepthThreshold>::Node::AddPoint(TPoint* const newPoint)
+template<class TLeaf, uint32_t SplitThreshold, uint32_t ChildDepthThreshold> requires LeafHasGetPositionVec2D<TLeaf>
+void QuadtreeConcept<TLeaf, SplitThreshold, ChildDepthThreshold>::Branch::AddLeaf(TLeaf* const newLeaf)
 {
-    if(m_Depth > ChildDepthThreshold || SplitThreshold > m_Points.size())
+    if(m_Depth > ChildDepthThreshold || SplitThreshold > m_Leaves.size())
     {
-        m_Points.push_back(newPoint);
+        m_Leaves.push_back(newLeaf);
         return;
     }
 
-    m_Children.reserve(4);
+    m_Branches.reserve(4);
 
     const float_t width{m_Rect.GetWidth() * 0.5f};
     const float_t height{m_Rect.GetHeight() * 0.5f};
+    const glm::vec2& topLeft{m_Rect.GetTopLeft()};
 
-    Node topLeft{m_Depth + 1};
-    topLeft.m_Rect = Rectangle{m_Rect.GetTopLeft(), width, height};
-    m_Children.push_back(std::move(topLeft));
-
-    Node topRight{m_Depth + 1};
-    topRight.m_Rect = Rectangle{m_Rect.GetTopLeft() + glm::vec2{width, 0.0f}, width, height};
-    m_Children.push_back(std::move(topRight));
-
-    Node bottomLeft{m_Depth + 1};
-    bottomLeft.m_Rect = Rectangle{m_Rect.GetTopLeft() + glm::vec2{0.0f, height}, width, height};
-    m_Children.push_back(std::move(bottomLeft));
-
-    Node bottomRight{m_Depth + 1};
-    bottomRight.m_Rect = Rectangle{m_Rect.GetTopLeft() + glm::vec2{width, height}, width, height};
-    m_Children.push_back(std::move(bottomRight));
+    // Top Left
+    m_Branches.emplace_back(m_Depth + 1, Rectangle{topLeft, width, height});
+    // Top Right
+    m_Branches.emplace_back(m_Depth + 1, Rectangle{topLeft + glm::vec2{width, 0.0f}, width, height});
+    // Bottom Left
+    m_Branches.emplace_back(m_Depth + 1, Rectangle{topLeft + glm::vec2{0.0f, height}, width, height});
+    // Bottom Right
+    m_Branches.emplace_back(m_Depth + 1, Rectangle{topLeft + glm::vec2{width, height}, width, height});
 
     {
-        Node* node{FindNode(this, newPoint->m_Position)};
-        node->AddPoint(newPoint);
+        Branch* const branch{FindBranch(this, newLeaf->GetPosition())};
+        branch->AddLeaf(newLeaf);
     }
 
-    for(TPoint* const point : m_Points)
+    for(TLeaf* const leaf : m_Leaves)
     {
-        Node* node{FindNode(this, point->m_Position)};
-        node->AddPoint(point);
+        Branch* const branch{FindBranch(this, leaf->GetPosition())};
+        branch->AddLeaf(leaf);
     }
 
-    m_Points = {};
+    m_Leaves = {};
 }
 
-template<class TPoint, uint32_t SplitThreshold, uint32_t ChildDepthThreshold> requires HasGetPositionVec2D<TPoint>
-void QuadtreeConcept<TPoint, SplitThreshold, ChildDepthThreshold>::Node::Reset()
+template<class TLeaf, uint32_t SplitThreshold, uint32_t ChildDepthThreshold> requires LeafHasGetPositionVec2D<TLeaf>
+void QuadtreeConcept<TLeaf, SplitThreshold, ChildDepthThreshold>::Branch::Reset()
 {
     m_Depth = 0;
     m_Rect = {};
-    m_Points.clear();
-    m_Children.clear();
+    m_Leaves.clear();
+    m_Branches.clear();
 }
 
-template<class TPoint, uint32_t SplitThreshold, uint32_t ChildDepthThreshold> requires HasGetPositionVec2D<TPoint>
-void QuadtreeConcept<TPoint, SplitThreshold, ChildDepthThreshold>::Node::SetRect(Rectangle&& rect)
+template<class TLeaf, uint32_t SplitThreshold, uint32_t ChildDepthThreshold> requires LeafHasGetPositionVec2D<TLeaf>
+void QuadtreeConcept<TLeaf, SplitThreshold, ChildDepthThreshold>::Branch::SetRect(Rectangle&& rect)
 {
     m_Rect = std::move(rect);
 }
 
-template<class TPoint, uint32_t SplitThreshold, uint32_t ChildDepthThreshold> requires HasGetPositionVec2D<TPoint>
-QuadtreeConcept<TPoint, SplitThreshold, ChildDepthThreshold>::Node* QuadtreeConcept<TPoint, SplitThreshold, ChildDepthThreshold>::Node::FindNode(
-    Node* const node, const glm::vec2& point)
+template<class TLeaf, uint32_t SplitThreshold, uint32_t ChildDepthThreshold> requires LeafHasGetPositionVec2D<TLeaf>
+QuadtreeConcept<TLeaf, SplitThreshold, ChildDepthThreshold>::Branch* QuadtreeConcept<TLeaf, SplitThreshold, ChildDepthThreshold>::Branch::FindBranch(
+    Branch* const branch, const glm::vec2& point)
 {
-    if(CollisionRectPoint(node->m_Rect, point))
+    if(CollisionRectPoint(branch->m_Rect, point))
     {
-        for(Node& childNode : node->m_Children)
+        for(Branch& childBranch : branch->m_Branches)
         {
-            if(Node* foundNode{FindNode(&childNode, point)})
+            if(Branch* const foundBranch{FindBranch(&childBranch, point)})
             {
-                return foundNode;
+                return foundBranch;
             }
         }
 
-        return node;
+        return branch;
     }
 
     return nullptr;
 }
 
-template<class TPoint, uint32_t SplitThreshold, uint32_t ChildDepthThreshold> requires HasGetPositionVec2D<TPoint>
-void QuadtreeConcept<TPoint, SplitThreshold, ChildDepthThreshold>::Node::FindNodes(
-    const Rectangle& rect, std::vector<Node*>& foundNodes)
+template<class TLeaf, uint32_t SplitThreshold, uint32_t ChildDepthThreshold> requires LeafHasGetPositionVec2D<TLeaf>
+void QuadtreeConcept<TLeaf, SplitThreshold, ChildDepthThreshold>::Branch::FindBranches(
+    const Rectangle& rect, std::vector<Branch*>& foundBranches)
 {
-    if(!m_Points.empty())
+    if(!HasBranches() && CollisionRectRect(rect, m_Rect))
     {
-        if(CollisionRectRect(rect, m_Rect))
-        {
-            foundNodes.push_back(this);
-        }
+        foundBranches.push_back(this);
+        return;
     }
 
-    for(Node& node : m_Children)
+    for(Branch& childBranch : m_Branches)
     {
-        node.FindNodes(rect, foundNodes);
+        childBranch.FindBranches(rect, foundBranches);
     }
 }
 
-template<class TPoint, uint32_t SplitThreshold, uint32_t ChildDepthThreshold> requires HasGetPositionVec2D<TPoint>
-void QuadtreeConcept<TPoint, SplitThreshold, ChildDepthThreshold>::Node::FindPoints(
-    const Rectangle& rect, std::vector<TPoint*>& foundPoints) const
+template<class TLeaf, uint32_t SplitThreshold, uint32_t ChildDepthThreshold> requires LeafHasGetPositionVec2D<TLeaf>
+void QuadtreeConcept<TLeaf, SplitThreshold, ChildDepthThreshold>::Branch::FindLeaves(
+    const Rectangle& rect, std::vector<TLeaf*>& foundLeaves) const
 {
-    if(!m_Points.empty())
+    if(!HasBranches() && CollisionRectRect(rect, m_Rect))
     {
-        if(CollisionRectRect(rect, m_Rect))
-        {
-            foundPoints.insert(std::end(foundPoints), std::begin(m_Points), std::end(m_Points));
-        }
+        foundLeaves.insert(std::end(foundLeaves), std::begin(m_Leaves), std::end(m_Leaves));
+        return;
     }
 
-    for(const Node& node : m_Children)
+    for(const Branch& childBranch : m_Branches)
     {
-        node.FindPoints(rect, foundPoints);
+        childBranch.FindLeaves(rect, foundLeaves);
     }
 }
 
-template<class TPoint, uint32_t SplitThreshold, uint32_t ChildDepthThreshold> requires HasGetPositionVec2D<TPoint>
-void QuadtreeConcept<TPoint, SplitThreshold, ChildDepthThreshold>::Reset()
+template<class TLeaf, uint32_t SplitThreshold, uint32_t ChildDepthThreshold> requires LeafHasGetPositionVec2D<TLeaf>
+void QuadtreeConcept<TLeaf, SplitThreshold, ChildDepthThreshold>::Reset()
 {
-    m_RootNode.Reset();
-    m_RootNode.SetRect(Rectangle{glm::vec2{0.0f, 0.0f}, static_cast<float_t>(WINDOW_WIDTH), static_cast<float_t>(WINDOW_HEIGHT)});
+    m_RootBranch.Reset();
+    m_RootBranch.SetRect(Rectangle{glm::vec2{0.0f, 0.0f}, static_cast<float_t>(WINDOW_WIDTH), static_cast<float_t>(WINDOW_HEIGHT)});
 }
 
-template<class TPoint, uint32_t SplitThreshold, uint32_t ChildDepthThreshold> requires HasGetPositionVec2D<TPoint>
-QuadtreeConcept<TPoint, SplitThreshold, ChildDepthThreshold>::Node* QuadtreeConcept<TPoint, SplitThreshold, ChildDepthThreshold>::FindNode(
+template<class TLeaf, uint32_t SplitThreshold, uint32_t ChildDepthThreshold> requires LeafHasGetPositionVec2D<TLeaf>
+QuadtreeConcept<TLeaf, SplitThreshold, ChildDepthThreshold>::Branch* QuadtreeConcept<TLeaf, SplitThreshold, ChildDepthThreshold>::FindBranch(
     const glm::vec2& point)
 {
-    return Node::FindNode(&m_RootNode, point);
+    return Branch::FindBranch(&m_RootBranch, point);
 }
 
-template<class TPoint, uint32_t SplitThreshold, uint32_t ChildDepthThreshold> requires HasGetPositionVec2D<TPoint>
-bool QuadtreeConcept<TPoint, SplitThreshold, ChildDepthThreshold>::FindNodes(
-    const Rectangle& rect, std::vector<Node*>& foundNodes)
+template<class TLeaf, uint32_t SplitThreshold, uint32_t ChildDepthThreshold> requires LeafHasGetPositionVec2D<TLeaf>
+bool QuadtreeConcept<TLeaf, SplitThreshold, ChildDepthThreshold>::FindBranches(
+    const Rectangle& rect, std::vector<Branch*>& foundBranches)
 {
-    assert(foundNodes.empty());
-    m_RootNode.FindNodes(rect, foundNodes);
-    return foundNodes.size();
+    assert(foundBranches.empty());
+    m_RootBranch.FindBranches(rect, foundBranches);
+    return !foundBranches.empty();
 }
 
-template<class TPoint, uint32_t SplitThreshold, uint32_t ChildDepthThreshold> requires HasGetPositionVec2D<TPoint>
-bool QuadtreeConcept<TPoint, SplitThreshold, ChildDepthThreshold>::FindPoints(
-    const Rectangle& rect, std::vector<TPoint*>& foundPoints) const
+template<class TLeaf, uint32_t SplitThreshold, uint32_t ChildDepthThreshold> requires LeafHasGetPositionVec2D<TLeaf>
+bool QuadtreeConcept<TLeaf, SplitThreshold, ChildDepthThreshold>::FindLeaves(
+    const Rectangle& rect, std::vector<TLeaf*>& foundLeaves) const
 {
-    assert(foundPoints.empty());
-    m_RootNode.FindPoints(rect, foundPoints);
-    return foundPoints.size();
+    assert(foundLeaves.empty());
+    m_RootBranch.FindLeaves(rect, foundLeaves);
+    return !foundLeaves.empty();
 }
 
-template<class TPoint, uint32_t SplitThreshold, uint32_t ChildDepthThreshold> requires HasGetPositionVec2D<TPoint>
-void QuadtreeConcept<TPoint, SplitThreshold, ChildDepthThreshold>::AddPoint(TPoint* const newPoint)
+template<class TLeaf, uint32_t SplitThreshold, uint32_t ChildDepthThreshold> requires LeafHasGetPositionVec2D<TLeaf>
+void QuadtreeConcept<TLeaf, SplitThreshold, ChildDepthThreshold>::AddLeaf(TLeaf* const newLeaf)
 {
-    Node* const node{FindNode(newPoint->m_Position)};
-    assert(node);
-    node->AddPoint(newPoint);
+    Branch* const branch{FindBranch(newLeaf->GetPosition())};
+    assert(branch);
+    branch->AddLeaf(newLeaf);
 }

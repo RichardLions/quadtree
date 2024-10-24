@@ -5,18 +5,18 @@
 #include "simulation/quadtreeconcept.h"
 
 template<class TQuadtree>
-void RenderQuadtreeConcept(SDL_Renderer* const renderer, const typename TQuadtree::Node& node)
+void RenderQuadtreeConcept(SDL_Renderer* const renderer, const typename TQuadtree::Branch& branch)
 {
-    if(node.GetChildren().empty())
+    if(!branch.HasBranches())
     {
-        const Rectangle& rectangle{node.GetRect()};
+        const Rectangle& rectangle{branch.GetRect()};
         const SDL_FRect rect{rectangle.GetTopLeft().x, rectangle.GetTopLeft().y, rectangle.GetWidth(), rectangle.GetHeight()};
         SDL_RenderRect(renderer, &rect);
     }
 
-    for(const TQuadtree::Node& childNode : node.GetChildren())
+    for(const TQuadtree::Branch& childBranch : branch.GetBranches())
     {
-        RenderQuadtreeConcept<TQuadtree>(renderer, childNode);
+        RenderQuadtreeConcept<TQuadtree>(renderer, childBranch);
     }
 }
 
