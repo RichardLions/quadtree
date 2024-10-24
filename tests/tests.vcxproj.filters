@@ -1,27 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
-  </ItemGroup>
-  <ItemGroup>
     <Filter Include="Misc">
-      <UniqueIdentifier>{2208dc40-b8a1-4202-a8c3-3bdd19ecc409}</UniqueIdentifier>
+      <UniqueIdentifier>{2f0dac61-5bb0-4cfd-a09a-7fbf1a19eecf}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include=".editorconfig">
-      <Filter>Misc</Filter>
-    </None>
     <None Include=".gitattributes">
       <Filter>Misc</Filter>
     </None>
     <None Include=".gitignore">
-      <Filter>Misc</Filter>
-    </None>
-    <None Include=".runsettings">
-      <Filter>Misc</Filter>
-    </None>
-    <None Include="README.md">
       <Filter>Misc</Filter>
     </None>
     <None Include="vcpkg.json">
@@ -32,6 +20,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="quadtreeexamples.h" />
+    <ClCompile Include="main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="quadtreetests.h" />
+    <ClInclude Include="stdafx.h" />
   </ItemGroup>
 </Project>

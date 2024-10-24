@@ -37,6 +37,6 @@ vcpkg new --application
 ```
 
 ### TODO
-- [ ] Implementation
+- [x] Implementation
 - [ ] Unit Tests
-- [ ] Benchmarks
+- [x] Benchmarks
