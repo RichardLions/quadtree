@@ -19,7 +19,7 @@ struct AppData
     SDL_Renderer* m_Renderer{nullptr};
     SDL_Window* m_Window{nullptr};
     glm::vec2 m_MousePoint{0.0f, 0.0f};
-    bool m_Paused{true};
+    bool m_Paused{false};
     bool m_DrawQuadtree{true};
     bool m_DrawTestSelectionQuad{true};
     bool m_UseQuadTree{true};
