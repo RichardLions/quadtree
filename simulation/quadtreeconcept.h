@@ -25,7 +25,7 @@ public:
         explicit Branch(uint32_t depth, Rectangle&& rect);
         void AddLeaf(Leaf* newLeaf);
         void Reset();
-        static Branch* FindBranch(Branch* branch, const glm::vec2& point);
+        static Branch* FindBranch(Branch& branch, const glm::vec2& point);
         void FindBranches(const Rectangle& rect, std::vector<Branch*>& foundBranches);
         void FindLeaves(const Rectangle& rect, std::vector<Leaf*>& foundLeaves) const;
         void SetRect(Rectangle&& rect);
@@ -93,17 +93,17 @@ void QuadtreeConcept<TLeaf, SplitThreshold, ChildDepthThreshold>::Branch::AddLea
     m_Branches.emplace_back(m_Depth + 1, Rectangle{topLeft + glm::vec2{width, height}, width, height});
 
     {
-        Branch* const branch{FindBranch(this, newLeaf->GetPosition())};
+        Branch* const branch{FindBranch(*this, newLeaf->GetPosition())};
         branch->AddLeaf(newLeaf);
     }
 
     for(TLeaf* const leaf : m_Leaves)
     {
-        Branch* const branch{FindBranch(this, leaf->GetPosition())};
+        Branch* const branch{FindBranch(*this, leaf->GetPosition())};
         branch->AddLeaf(leaf);
     }
 
-    m_Leaves = {};
+    m_Leaves.clear();
 }
 
 template<class TLeaf, uint32_t SplitThreshold, uint32_t ChildDepthThreshold> requires LeafHasGetPositionVec2D<TLeaf>
@@ -123,19 +123,19 @@ void QuadtreeConcept<TLeaf, SplitThreshold, ChildDepthThreshold>::Branch::SetRec
 
 template<class TLeaf, uint32_t SplitThreshold, uint32_t ChildDepthThreshold> requires LeafHasGetPositionVec2D<TLeaf>
 QuadtreeConcept<TLeaf, SplitThreshold, ChildDepthThreshold>::Branch* QuadtreeConcept<TLeaf, SplitThreshold, ChildDepthThreshold>::Branch::FindBranch(
-    Branch* const branch, const glm::vec2& point)
+    Branch& branch, const glm::vec2& point)
 {
-    if(CollisionRectPoint(branch->m_Rect, point))
+    if(CollisionRectPoint(branch.m_Rect, point))
     {
-        for(Branch& childBranch : branch->m_Branches)
+        for(Branch& childBranch : branch.m_Branches)
         {
-            if(Branch* const foundBranch{FindBranch(&childBranch, point)})
+            if(Branch* const foundBranch{FindBranch(childBranch, point)})
             {
                 return foundBranch;
             }
         }
 
-        return branch;
+        return &branch;
     }
 
     return nullptr;
@@ -184,7 +184,7 @@ template<class TLeaf, uint32_t SplitThreshold, uint32_t ChildDepthThreshold> req
 QuadtreeConcept<TLeaf, SplitThreshold, ChildDepthThreshold>::Branch* QuadtreeConcept<TLeaf, SplitThreshold, ChildDepthThreshold>::FindBranch(
     const glm::vec2& point)
 {
-    return Branch::FindBranch(&m_RootBranch, point);
+    return Branch::FindBranch(m_RootBranch, point);
 }
 
 template<class TLeaf, uint32_t SplitThreshold, uint32_t ChildDepthThreshold> requires LeafHasGetPositionVec2D<TLeaf>

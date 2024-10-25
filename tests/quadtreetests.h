@@ -38,10 +38,14 @@ TEST_CASE("Search Quadtree - Benchmarks")
     }
 
     Quadtree quadtree{};
-    RebuildQuadtree(quadtree, circles);
 
     BENCHMARK("Benchmark")
     {
+        for(Circle& circle : circles)
+        {
+            ResolveCollisionCircleEdgeOfScreen(circle);
+        }
+        RebuildQuadtree(quadtree, circles);
         UpdateCirclesQuadtree(circles, quadtree, DELTA);
     };
 }
@@ -57,6 +61,10 @@ TEST_CASE("Brute Force - Benchmarks")
 
     BENCHMARK("Benchmark")
     {
+        for(Circle& circle : circles)
+        {
+            ResolveCollisionCircleEdgeOfScreen(circle);
+        }
         UpdateCirclesBruteForce(circles, DELTA);
     };
 }
