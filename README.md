@@ -4,9 +4,9 @@ This was inspired by [Quadtree](https://en.wikipedia.org/wiki/Quadtree).
 
 ## When To Use
 
-A Quadtree is an optimisation technique used to structure data to improve the retrieval time of nearby objects in a 2D space. It does this by grouping objects into a root "quad", then when the root contains a number of objects above a threshold it splits the quad into four and groups the objects into these quads. This is repeated for all objects in the 2D space which creates a tree of quads.
+A Quadtree is an optimisation technique used to structure data to improve the retrieval time of nearby objects in a 2D space. It does this by grouping objects into a root quad. When the root quad contains a number of objects above a threshold, it is split into four quads and groups the objects into these quads. This is repeated for all objects in the 2D space which creates a tree of quads.
 
-It becomes a good choice when the cost of constructing the Quadtree is outweighed by the cost of looping over every object in the world when finding nearby objects.
+It becomes a good choice when the cost of constructing the Quadtree is outweighed by the cost of each object looping over every other object in the world when finding nearby objects.
 
 Note: The size of the world and the density/number of objects within it will effect how to tune the split threshold and child branch depth to achieve the best performance.
 
@@ -29,7 +29,7 @@ using Quadtree = QuadtreeConcept<Circle, SPLIT_THRESHOLD, CHILD_DEPTH_THRESHOLD>
 inline constexpr auto RebuildQuadtree = RebuildQuadtreeConcept<Quadtree>;
 ```
 
-Build the Quadtree by passing an instance of the defined Quadtree and vector of Leaves:
+Build the Quadtree by passing an instance of the defined Quadtree and a vector of Leaves:
 
 ```cpp
 Quadtree quadtree{};
@@ -39,12 +39,12 @@ std::vector<Circle> circles{};
 RebuildQuadtree(quadtree, circles);
 ```
 
-Use Quadtree to find Leaves that intersect a rectangle:
+Use the Quadtree to find Leaves that intersect with a rectangle:
 
 ```cpp
 const Rectangle rect{0.0f, 0.0f, 50.0f, 50.0f};
-std::vector<Circle*> circles{};
-if(quadtree.FindLeaves(rect, circles))
+std::vector<Circle*> intersectingLeaves{};
+if(quadtree.FindLeaves(rect, intersectingLeaves))
 {
     ...
 }
