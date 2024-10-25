@@ -10,7 +10,45 @@ It becomes a good choice when the cost of constructing the Quadtree is outweighe
 
 Note: The size of the world and the density/number of objects within it will effect how to tune the split threshold and child branch depth to achieve the best performance.
 
+<p float="left">
+<img src="quadtreeexample.gif" width="800"/>
+</p>
+
 ## Features
+
+Define a Quadtree with any leaf type (Leaf type is required to support the LeafHasGetPositionVec2D concept). Also define the function to rebuild the defined Quadtree type:
+
+```cpp
+struct Circle
+{
+    const glm::vec2& GetPosition() const { return m_Position; }
+    ...
+};
+
+using Quadtree = QuadtreeConcept<Circle, SPLIT_THRESHOLD, CHILD_DEPTH_THRESHOLD>;
+inline constexpr auto RebuildQuadtree = RebuildQuadtreeConcept<Quadtree>;
+```
+
+Build the Quadtree by passing an instance of the defined Quadtree and vector of Leaves:
+
+```cpp
+Quadtree quadtree{};
+std::vector<Circle> circles{};
+...
+
+RebuildQuadtree(quadtree, circles);
+```
+
+Use Quadtree to find Leaves that intersect a rectangle:
+
+```cpp
+const Rectangle rect{0.0f, 0.0f, 50.0f, 50.0f};
+std::vector<Circle*> circles{};
+if(quadtree.FindLeaves(rect, circles))
+{
+    ...
+}
+```
 
 ## Setup
 
