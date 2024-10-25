@@ -115,7 +115,7 @@ SDL_AppResult SDL_AppIterate(void* const appState)
     {
         if(appData->m_UseQuadTree)
         {
-            UpdateCirclesQuadtree(appData->m_Circles, appData->m_Quadtree, delta);
+            UpdateCirclesQuadtreeInnerLoop(appData->m_Quadtree, appData->m_Quadtree.GetRootBranch(), delta);
         }
         else
         {

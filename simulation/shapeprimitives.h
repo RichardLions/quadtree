@@ -112,6 +112,14 @@ inline bool CollisionRectPoint(const Rectangle& rect, const glm::vec2& point)
     return false;
 }
 
+inline bool CollisionRectWithinRect(const Rectangle& innerRect, const Rectangle& outerRect)
+{
+    return CollisionRectPoint(outerRect, innerRect.GetTopLeft()) &&
+            CollisionRectPoint(outerRect, innerRect.GetTopRight()) &&
+            CollisionRectPoint(outerRect, innerRect.GetBottomLeft()) &&
+            CollisionRectPoint(outerRect, innerRect.GetBottomRight());
+}
+
 inline bool CollisionRectRect(const Rectangle& rectA, const Rectangle& rectB)
 {
     // https://www.jeffreythompson.org/collision-detection/table_of_contents.php

@@ -39,14 +39,34 @@ TEST_CASE("Search Quadtree - Benchmarks")
 
     Quadtree quadtree{};
 
-    BENCHMARK("Benchmark")
+    BENCHMARK("Found Branches")
     {
         for(Circle& circle : circles)
         {
             ResolveCollisionCircleEdgeOfScreen(circle);
         }
         RebuildQuadtree(quadtree, circles);
-        UpdateCirclesQuadtree(circles, quadtree, DELTA);
+        UpdateCirclesQuadtreeFoundBranches(circles, quadtree, DELTA);
+    };
+
+    BENCHMARK("Found Leaves")
+    {
+        for(Circle& circle : circles)
+        {
+            ResolveCollisionCircleEdgeOfScreen(circle);
+        }
+        RebuildQuadtree(quadtree, circles);
+        UpdateCirclesQuadtreeFoundLeaves(circles, quadtree, DELTA);
+    };
+
+    BENCHMARK("Inner Loop")
+    {
+        for(Circle& circle : circles)
+        {
+            ResolveCollisionCircleEdgeOfScreen(circle);
+        }
+        RebuildQuadtree(quadtree, circles);
+        UpdateCirclesQuadtreeInnerLoop(quadtree, quadtree.GetRootBranch(), DELTA);
     };
 }
 
