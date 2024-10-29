@@ -12,13 +12,12 @@
     },
     {
       "kind": "git",
-      "repository": "https://github.com/Honeybunch/vcpkg",
-      "baseline": "656c2b649d1d4fdf6e17d8bbabcd31158a783a55",
+      "repository": "https://github.com/RichardLions/vcpkg-registry",
+      "baseline": "024926bc0a3a72a450b5f89faf0872afe7ac40c8",
       "packages": [
-        "sdl3",
-        "sdl3-mixer"
-      ],
-      "reference": "sdl3-mixer"
+        "random",
+        "sdl3"
+      ]
     }
   ]
 }

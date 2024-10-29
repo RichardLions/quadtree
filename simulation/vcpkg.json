@@ -1,8 +1,13 @@
 {
   "dependencies": [
+    "random",
     "glm"
   ],
   "overrides": [
+    {
+      "name": "random",
+      "version": "0.1.0-testing"
+    },
     {
       "name": "glm",
       "version": "1.0.1#3"

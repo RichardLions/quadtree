@@ -129,7 +129,7 @@ SDL_AppResult SDL_AppIterate(void* const appState)
         ResolveCollisionCircleEdgeOfScreen(circle);
         SDL_SetRenderDrawColor(
             appData->m_Renderer,
-            static_cast<uint8_t>(std::clamp(255.0f * (glm::length(circle.m_Velocity) / MAX_VELOCITY), 50.f, 255.0f)), 0, 0, 255);
+            static_cast<uint8_t>(glm::clamp(255.0f * (glm::length(circle.m_Velocity) / MAX_VELOCITY), 50.f, 255.0f)), 0, 0, 255);
         SDL_RenderFillCircle(appData->m_Renderer, circle.m_Position.x, circle.m_Position.y, circle.m_Radius);
     }
 

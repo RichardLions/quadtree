@@ -1,6 +1,6 @@
 #pragma once
 
-#include "random.h"
+#include <random/random.h>
 
 inline constexpr uint32_t WINDOW_WIDTH{1920};
 inline constexpr uint32_t WINDOW_HEIGHT{1080};

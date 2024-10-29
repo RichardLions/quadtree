@@ -1,9 +1,14 @@
 {
   "dependencies": [
-    "catch2",
-    "glm"
+    "random",
+    "glm",
+    "catch2"
   ],
   "overrides": [
+    {
+      "name": "random",
+      "version": "0.1.0-testing"
+    },
     {
       "name": "glm",
       "version": "1.0.1#3"
