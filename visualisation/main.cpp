@@ -11,6 +11,8 @@
 
 #include "quadtree.h"
 #include "sdlextensions.h"
+#include <string>
+#include <format>
 
 struct AppData
 {
@@ -97,9 +99,11 @@ SDL_AppResult SDL_AppIterate(void* const appState)
     // Log fps
     static float_t deltaSum{0.0f};
     static uint32_t frames{0};
+    static uint32_t fps{0};
     if(deltaSum > 1.0f)
     {
         SDL_Log("FPS - %i", frames);
+        fps = frames;
         deltaSum = 0.0f;
         frames = 0;
     }
@@ -171,6 +175,21 @@ SDL_AppResult SDL_AppIterate(void* const appState)
             }
         }
     }
+
+    // Controls
+    SDL_SetRenderDrawColor(appData->m_Renderer, 255, 255, 255, 255);
+    SDL_SetRenderScale(appData->m_Renderer, 1.5f, 1.5f);
+    SDL_RenderDebugText(appData->m_Renderer, 3.0f, 3.0f, std::format("FPS - {}", std::to_string(fps)).c_str());
+    SDL_RenderDebugText(appData->m_Renderer, 3.0f, 13.0f, "[1] - Render Quadtree on/off");
+    SDL_RenderDebugText(appData->m_Renderer, 3.0f, 23.0f, "[2] - Render mouse position Quadtree test on/off");
+    SDL_RenderDebugText(appData->m_Renderer, 3.0f, 33.0f, "[Space] - Pause on/off");
+    if(appData->m_UseQuadTree)
+        SDL_RenderDebugText(appData->m_Renderer, 3.0f, 43.0f, "[Enter] - Use brute force collision testing");
+    else
+        SDL_RenderDebugText(appData->m_Renderer, 3.0f, 43.0f, "[Enter] - Use Quadtree collision testing");
+    SDL_RenderDebugText(appData->m_Renderer, 3.0f, 53.0f, "[Left Click] - Spawn circle at mouse pointer");
+    SDL_RenderDebugText(appData->m_Renderer, 3.0f, 63.0f, "[ESC] - Shutdown");
+    SDL_SetRenderScale(appData->m_Renderer, 1.0f, 1.0f);
 
     SDL_RenderPresent(appData->m_Renderer);
 

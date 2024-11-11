@@ -63,8 +63,8 @@ Inputs:
 * [2] - Render mouse position Quadtree test on/off
 * [Space] - Pause the simulation on/off
 * [Enter] - Switch between brute force collision tests and using Quadtree
-* [ESC] - Shutdown
 * [Left Click] - Spawn circle at mouse pointer
+* [ESC] - Shutdown
 
 ### Catch2
 The examples for how to use the Quadtree are written as Unit Tests/Benchmarks.

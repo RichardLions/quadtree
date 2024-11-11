@@ -13,7 +13,7 @@
     {
       "kind": "git",
       "repository": "https://github.com/RichardLions/vcpkg-registry",
-      "baseline": "024926bc0a3a72a450b5f89faf0872afe7ac40c8",
+      "baseline": "c0c72e60113bae7b9138e92b21fcf5f24fc36b82",
       "packages": [
         "random",
         "sdl3"
