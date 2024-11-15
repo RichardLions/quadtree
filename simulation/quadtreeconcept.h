@@ -113,10 +113,11 @@ void QuadtreeConcept<TLeaf, SplitThreshold, ChildDepthThreshold>::Branch::AddLea
 template<class TLeaf, uint32_t SplitThreshold, uint32_t ChildDepthThreshold> requires LeafHasGetPositionVec2D<TLeaf>
 void QuadtreeConcept<TLeaf, SplitThreshold, ChildDepthThreshold>::Branch::Reset()
 {
-    m_Depth = 0;
-    m_Rect = {};
-    m_Leaves.clear();
     m_Branches.clear();
+    m_Leaves.clear();
+    m_Rect = {};
+    m_Parent = nullptr;
+    m_Depth = 0;
 }
 
 template<class TLeaf, uint32_t SplitThreshold, uint32_t ChildDepthThreshold> requires LeafHasGetPositionVec2D<TLeaf>
