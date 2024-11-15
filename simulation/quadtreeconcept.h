@@ -66,9 +66,9 @@ void RebuildQuadtreeConcept(TQuadtree& quadtree, std::vector<typename TQuadtree:
 
 template<class TLeaf, uint32_t SplitThreshold, uint32_t ChildDepthThreshold> requires LeafHasGetPositionVec2D<TLeaf>
 QuadtreeConcept<TLeaf, SplitThreshold, ChildDepthThreshold>::Branch::Branch(const uint32_t depth, Rectangle&& rect, Branch* const parent)
-    : m_Depth{depth}
-    , m_Rect{std::move(rect)}
+    : m_Rect{std::move(rect)}
     , m_Parent{parent}
+    , m_Depth{depth}
 {
 }
 
