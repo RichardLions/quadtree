@@ -50,7 +50,7 @@ void UpdateCirclesQuadtreeFoundBranches(std::vector<Circle>& circles, Quadtree& 
     }
 }
 
-void UpdateCirclesQuadtreeInnerLoop(Quadtree& quadtree, const Quadtree::Branch& branch, float_t delta)
+void UpdateCirclesQuadtreeInnerLoop(Quadtree& quadtree, const Quadtree::Branch& branch, const float_t delta)
 {
     std::vector<Quadtree::Branch*> foundBranches{};
     for(Circle* const circle : branch.GetLeaves())
@@ -71,7 +71,15 @@ void UpdateCirclesQuadtreeInnerLoop(Quadtree& quadtree, const Quadtree::Branch& 
         else
         {
             foundBranches.clear();
-            quadtree.FindBranches(circleAprox, foundBranches);
+            if(Quadtree::Branch* const parentsParent{branch.GetParentsParent()})
+            {
+                parentsParent->FindBranches(circleAprox, foundBranches);
+            }
+            else
+            {
+                quadtree.FindBranches(circleAprox, foundBranches);
+            }
+
             for(Quadtree::Branch* const foundBranch : foundBranches)
             {
                 for(Circle* const otherCircle : foundBranch->GetLeaves())

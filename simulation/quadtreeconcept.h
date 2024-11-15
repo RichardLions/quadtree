@@ -22,7 +22,7 @@ public:
     {
     public:
         Branch() = default;
-        explicit Branch(uint32_t depth, Rectangle&& rect);
+        explicit Branch(uint32_t depth, Rectangle&& rect, Branch* parent);
         void AddLeaf(Leaf* newLeaf);
         void Reset();
         static Branch* FindBranch(Branch& branch, const glm::vec2& point);
@@ -33,10 +33,13 @@ public:
         const Rectangle& GetRect() const { return m_Rect; }
         const std::vector<Branch>& GetBranches() const { return m_Branches; }
         const std::vector<Leaf*>& GetLeaves() const { return m_Leaves; }
+        Branch* GetParent() const { return m_Parent; }
+        Branch* GetParentsParent() const { return m_Parent ? m_Parent->GetParent() : nullptr; }
     private:
         std::vector<Branch> m_Branches{};
         std::vector<Leaf*> m_Leaves{};
         Rectangle m_Rect{};
+        Branch* m_Parent{nullptr};
         uint32_t m_Depth{0};
     };
 
@@ -62,9 +65,10 @@ void RebuildQuadtreeConcept(TQuadtree& quadtree, std::vector<typename TQuadtree:
 }
 
 template<class TLeaf, uint32_t SplitThreshold, uint32_t ChildDepthThreshold> requires LeafHasGetPositionVec2D<TLeaf>
-QuadtreeConcept<TLeaf, SplitThreshold, ChildDepthThreshold>::Branch::Branch(const uint32_t depth, Rectangle&& rect)
+QuadtreeConcept<TLeaf, SplitThreshold, ChildDepthThreshold>::Branch::Branch(const uint32_t depth, Rectangle&& rect, Branch* const parent)
     : m_Depth{depth}
     , m_Rect{std::move(rect)}
+    , m_Parent{parent}
 {
 }
 
@@ -84,13 +88,13 @@ void QuadtreeConcept<TLeaf, SplitThreshold, ChildDepthThreshold>::Branch::AddLea
     const glm::vec2& topLeft{m_Rect.GetTopLeft()};
 
     // Top Left
-    m_Branches.emplace_back(m_Depth + 1, Rectangle{topLeft, width, height});
+    m_Branches.emplace_back(m_Depth + 1, Rectangle{topLeft, width, height}, this);
     // Top Right
-    m_Branches.emplace_back(m_Depth + 1, Rectangle{topLeft + glm::vec2{width, 0.0f}, width, height});
+    m_Branches.emplace_back(m_Depth + 1, Rectangle{topLeft + glm::vec2{width, 0.0f}, width, height}, this);
     // Bottom Left
-    m_Branches.emplace_back(m_Depth + 1, Rectangle{topLeft + glm::vec2{0.0f, height}, width, height});
+    m_Branches.emplace_back(m_Depth + 1, Rectangle{topLeft + glm::vec2{0.0f, height}, width, height}, this);
     // Bottom Right
-    m_Branches.emplace_back(m_Depth + 1, Rectangle{topLeft + glm::vec2{width, height}, width, height});
+    m_Branches.emplace_back(m_Depth + 1, Rectangle{topLeft + glm::vec2{width, height}, width, height}, this);
 
     {
         Branch* const branch{FindBranch(*this, newLeaf->GetPosition())};
