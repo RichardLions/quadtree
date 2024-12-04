@@ -15,8 +15,7 @@
       "repository": "https://github.com/RichardLions/vcpkg-registry",
       "baseline": "c0c72e60113bae7b9138e92b21fcf5f24fc36b82",
       "packages": [
-        "random",
-        "sdl3"
+        "random"
       ]
     }
   ]
